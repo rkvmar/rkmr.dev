@@ -3,8 +3,7 @@
 	<p>I make stuff on the internet that nobody asked for</p>
 </div>
 <div class="info-container">
-	<p>Basically I build whatever I want</p>
-	<p>It's usually useless</p>
+	<p>idk what to actually put here so</p>
 </div>
 
 <style>
