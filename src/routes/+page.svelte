@@ -1,10 +1,9 @@
 <div class="title-container">
-	<h1>Hello</h1>
-	<p>I make stuff on the internet that nobody asked for</p>
+	<h1>Aesthetically pleasing website</h1>
 </div>
-<div class="info-container">
+<!-- <div class="info-container">
 	<p>idk what to actually put here so</p>
-</div>
+</div> -->
 
 <style>
 	.title-container {
@@ -16,6 +15,7 @@
 		align-items: center;
 		text-align: center;
 		background-color: var(--secondary);
+
 	}
 	.info-container {
 		width: 100vw;
@@ -30,7 +30,8 @@
 	h1 {
 		font-size: 5rem;
 		margin: 0;
-		color: var(--text)
+		color: var(--accent);
+		font-style: italic;
 	}
 
 	p {
