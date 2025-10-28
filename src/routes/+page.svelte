@@ -1,5 +1,5 @@
 <div class="title-container">
-	<h1>Aesthetically pleasing website</h1>
+	<h1>Æsthetically pleasing website</h1>
 </div>
 <!-- <div class="info-container">
 	<p>idk what to actually put here so</p>
