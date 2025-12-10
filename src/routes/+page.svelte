@@ -1,41 +1,27 @@
-<div class="title-container">
-	<h1>Æsthetically pleasing website</h1>
+<script lang="ts">
+	import ShellPrompt from '$lib/components/ShellPrompt.svelte';
+	import { onMount } from 'svelte';
+	let shellPrompt;
+
+	async function runCommand(command: string) {
+		await shellPrompt.typeAndExecuteCommand(command);
+	}
+	onMount(() => {
+		runCommand('run');
+	});
+</script>
+
+<div class="container">
+	<ShellPrompt bind:this={shellPrompt} typingDelay={50} commandPause={100} />
 </div>
-<!-- <div class="info-container">
-	<p>idk what to actually put here so</p>
-</div> -->
 
 <style>
-	.title-container {
+	@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+	.container {
+		background-color: #181825;
 		width: 100vw;
 		height: 100vh;
 		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		text-align: center;
-		background-color: var(--secondary);
-
-	}
-	.info-container {
-		width: 100vw;
-		height: 100vh;
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		text-align: center;
-		background-color: var(--accent);
-	}
-	h1 {
-		font-size: 5rem;
-		margin: 0;
-		color: var(--accent);
-		font-style: italic;
-	}
-
-	p {
-		font-size: 1.5rem;
-		color: var(--subtext)
+		justify-content: left;
 	}
 </style>
