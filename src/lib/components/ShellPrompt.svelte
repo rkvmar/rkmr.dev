@@ -19,8 +19,6 @@
 
 	let terminalElement: HTMLElement;
 
-
-
 	const directories = {
 		'~/': ['about', 'projects'],
 		'~/about': [],
@@ -45,8 +43,9 @@
 	const runOutputs = {
 		'~/': '         ░██                                           ░██                       \n         ░██                                           ░██                       \n░██░████ ░██    ░██░█████████████  ░██░████      ░████████  ░███████  ░██    ░██ \n░███     ░██   ░██ ░██   ░██   ░██ ░███         ░██    ░██ ░██    ░██ ░██    ░██ \n░██      ░███████  ░██   ░██   ░██ ░██          ░██    ░██ ░█████████  ░██  ░██  \n░██      ░██   ░██ ░██   ░██   ░██ ░██          ░██   ░███ ░██          ░██░██   \n░██      ░██    ░██░██   ░██   ░██ ░██      ░██  ░█████░██  ░███████     ░███    \n\n I make stupid stuff on the interweb\n[link:cmd:cd ~/about && run]About[/link] | [link:cmd:cd ~/projects && run]Projects[/link] | [link:url:https://github.com/rkvmar]Github[/link]',
 		'~/about':
-			'           ░██                                 ░██    \n           ░██                                 ░██    \n ░██████   ░████████   ░███████  ░██    ░██ ░████████ \n      ░██  ░██    ░██ ░██    ░██ ░██    ░██    ░██    \n ░███████  ░██    ░██ ░██    ░██ ░██    ░██    ░██    \n░██   ░██  ░███   ░██ ░██    ░██ ░██   ░███    ░██    \n ░█████░██ ░██░█████   ░███████   ░█████░██     ░████\n\nI thinkn\'t, therefore I amn\'t',
-		'~/projects':'                                 ░██                          ░██               \n                                                              ░██               \n░████████  ░██░████  ░███████    ░██  ░███████   ░███████  ░████████  ░███████  \n░██    ░██ ░███     ░██    ░██   ░██ ░██    ░██ ░██    ░██    ░██    ░██        \n░██    ░██ ░██      ░██    ░██   ░██ ░█████████ ░██           ░██     ░███████  \n░███   ░██ ░██      ░██    ░██   ░██ ░██        ░██    ░██    ░██           ░██ \n░██░█████  ░██       ░███████    ░██  ░███████   ░███████      ░████  ░███████  \n░██                              ░██                                            \n░██                            ░███\n\nYou think I do stuff?'
+			"           ░██                                 ░██    \n           ░██                                 ░██    \n ░██████   ░████████   ░███████  ░██    ░██ ░████████ \n      ░██  ░██    ░██ ░██    ░██ ░██    ░██    ░██    \n ░███████  ░██    ░██ ░██    ░██ ░██    ░██    ░██    \n░██   ░██  ░███   ░██ ░██    ░██ ░██   ░███    ░██    \n ░█████░██ ░██░█████   ░███████   ░█████░██     ░████\n\nI thinkn't, therefore I amn't\n[link:cmd:cd && clear && run]Home[/link]",
+		'~/projects':
+			'                                 ░██                          ░██               \n                                                              ░██               \n░████████  ░██░████  ░███████    ░██  ░███████   ░███████  ░████████  ░███████  \n░██    ░██ ░███     ░██    ░██   ░██ ░██    ░██ ░██    ░██    ░██    ░██        \n░██    ░██ ░██      ░██    ░██   ░██ ░█████████ ░██           ░██     ░███████  \n░███   ░██ ░██      ░██    ░██   ░██ ░██        ░██    ░██    ░██           ░██ \n░██░█████  ░██       ░███████    ░██  ░███████   ░███████      ░████  ░███████  \n░██                              ░██                                            \n░██                            ░███\n\nYou think I do stuff?\n[link:cmd:cd && clear && run]Home[/link]'
 	};
 
 	function parseLinks(text: string) {
@@ -88,10 +87,10 @@
 			window.open(target, '_blank');
 		} else if (linkType === 'cmd') {
 			if (target.includes('&&')) {
-				const commands = target.split('&&').map(cmd => cmd.trim());
+				const commands = target.split('&&').map((cmd) => cmd.trim());
 				for (const cmd of commands) {
 					await typeAndExecuteCommand(cmd);
-					await new Promise(resolve => setTimeout(resolve, commandPause));
+					await new Promise((resolve) => setTimeout(resolve, commandPause));
 				}
 			} else {
 				await typeAndExecuteCommand(target);
@@ -102,7 +101,7 @@
 	export async function typeAndExecuteCommand(command: string) {
 		clearPrompt();
 		await typeText(command, typingDelay);
-		await new Promise(resolve => setTimeout(resolve, commandPause));
+		await new Promise((resolve) => setTimeout(resolve, commandPause));
 		executeCommandDirectly(command);
 	}
 
