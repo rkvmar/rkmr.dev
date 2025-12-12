@@ -32,7 +32,8 @@
 		ls: '',
 		cd: '',
 		run: '',
-		open: ''
+		open: '',
+		fimsh: 'he? he romtater??'
 	};
 
 	const runOutputs = {
