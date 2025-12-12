@@ -36,7 +36,7 @@
 	};
 
 	const runOutputs = {
-		'~/': '         ░██                                           ░██                       \n         ░██                                           ░██                       \n░██░████ ░██    ░██░█████████████  ░██░████      ░████████  ░███████  ░██    ░██ \n░███     ░██   ░██ ░██   ░██   ░██ ░███         ░██    ░██ ░██    ░██ ░██    ░██ \n░██      ░███████  ░██   ░██   ░██ ░██          ░██    ░██ ░█████████  ░██  ░██  \n░██      ░██   ░██ ░██   ░██   ░██ ░██          ░██   ░███ ░██          ░██░██   \n░██      ░██    ░██░██   ░██   ░██ ░██      ░██  ░█████░██  ░███████     ░███    \n\n I make stupid stuff on the interweb\n[link:cmd:cd ~/about && clear && run]About[/link] | [link:cmd:cd ~/projects && clear && run]Projects[/link] | [link:cmd:open https://github.com/rkvmar]Github[/link]',
+		'~/': '         ░██                                           ░██                       \n         ░██                                           ░██                       \n░██░████ ░██    ░██░█████████████  ░██░████      ░████████  ░███████  ░██    ░██ \n░███     ░██   ░██ ░██   ░██   ░██ ░███         ░██    ░██ ░██    ░██ ░██    ░██ \n░██      ░███████  ░██   ░██   ░██ ░██          ░██    ░██ ░█████████  ░██  ░██  \n░██      ░██   ░██ ░██   ░██   ░██ ░██          ░██   ░███ ░██          ░██░██   \n░██      ░██    ░██░██   ░██   ░██ ░██      ░██  ░█████░██  ░███████     ░███    \n\n I make stupid stuff on the interwebs\n[link:cmd:cd ~/about && clear && run]About[/link] | [link:cmd:cd ~/projects && clear && run]Projects[/link] | [link:cmd:open https://github.com/rkvmar]Github[/link]',
 		'~/about':
 			"           ░██                                 ░██    \n           ░██                                 ░██    \n ░██████   ░████████   ░███████  ░██    ░██ ░████████ \n      ░██  ░██    ░██ ░██    ░██ ░██    ░██    ░██    \n ░███████  ░██    ░██ ░██    ░██ ░██    ░██    ░██    \n░██   ░██  ░███   ░██ ░██    ░██ ░██   ░███    ░██    \n ░█████░██ ░██░█████   ░███████   ░█████░██     ░████\n\nI thinkn't, therefore I amn't\n[link:cmd:cd && clear && run]Home[/link]",
 		'~/projects':
@@ -260,7 +260,6 @@
 	function handlePopState() {
 		setDirectoryFromUrl();
 	}
-
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) {
