@@ -4,6 +4,7 @@
 	export let user = 'rkmr';
 	export let host = 'rkmr.dev';
 	export let path = '~/';
+	export let initialPath = '';
 	let prompt = '';
 	let output: Array<{
 		type: 'command' | 'result';
@@ -26,22 +27,16 @@
 	};
 
 	const commands = {
-		help: 'Available commands: help, clear, cd, ls, run',
+		help: 'Available commands: help, clear, cd, ls, run, open',
 		clear: '',
 		ls: '',
 		cd: '',
-		run: ''
-	};
-
-	const directoryContent = {
-		'~/about':
-			'About Me\n--------\nI am a passionate software engineer with expertise in web development,\nopen source projects, and modern programming languages.\n\nSkills: JavaScript, TypeScript, Svelte, React, Node.js, Python',
-		'~/projects':
-			'My Projects\n-----------\n1. rkmr.dev - Personal portfolio website\n2. Terminal Portfolio - Interactive shell interface\n3. Various open source contributions on GitHub\n\nVisit: github.com/rkmr'
+		run: '',
+		open: ''
 	};
 
 	const runOutputs = {
-		'~/': '         ░██                                           ░██                       \n         ░██                                           ░██                       \n░██░████ ░██    ░██░█████████████  ░██░████      ░████████  ░███████  ░██    ░██ \n░███     ░██   ░██ ░██   ░██   ░██ ░███         ░██    ░██ ░██    ░██ ░██    ░██ \n░██      ░███████  ░██   ░██   ░██ ░██          ░██    ░██ ░█████████  ░██  ░██  \n░██      ░██   ░██ ░██   ░██   ░██ ░██          ░██   ░███ ░██          ░██░██   \n░██      ░██    ░██░██   ░██   ░██ ░██      ░██  ░█████░██  ░███████     ░███    \n\n I make stupid stuff on the interweb\n[link:cmd:cd ~/about && run]About[/link] | [link:cmd:cd ~/projects && run]Projects[/link] | [link:url:https://github.com/rkvmar]Github[/link]',
+		'~/': '         ░██                                           ░██                       \n         ░██                                           ░██                       \n░██░████ ░██    ░██░█████████████  ░██░████      ░████████  ░███████  ░██    ░██ \n░███     ░██   ░██ ░██   ░██   ░██ ░███         ░██    ░██ ░██    ░██ ░██    ░██ \n░██      ░███████  ░██   ░██   ░██ ░██          ░██    ░██ ░█████████  ░██  ░██  \n░██      ░██   ░██ ░██   ░██   ░██ ░██          ░██   ░███ ░██          ░██░██   \n░██      ░██    ░██░██   ░██   ░██ ░██      ░██  ░█████░██  ░███████     ░███    \n\n I make stupid stuff on the interweb\n[link:cmd:cd ~/about && clear && run]About[/link] | [link:cmd:cd ~/projects && clear && run]Projects[/link] | [link:cmd:open https://github.com/rkvmar]Github[/link]',
 		'~/about':
 			"           ░██                                 ░██    \n           ░██                                 ░██    \n ░██████   ░████████   ░███████  ░██    ░██ ░████████ \n      ░██  ░██    ░██ ░██    ░██ ░██    ░██    ░██    \n ░███████  ░██    ░██ ░██    ░██ ░██    ░██    ░██    \n░██   ░██  ░███   ░██ ░██    ░██ ░██   ░███    ░██    \n ░█████░██ ░██░█████   ░███████   ░█████░██     ░████\n\nI thinkn't, therefore I amn't\n[link:cmd:cd && clear && run]Home[/link]",
 		'~/projects':
@@ -157,10 +152,12 @@
 			handleLs();
 		} else if (cmd === 'run') {
 			handleRun();
-		} else if (cmd === 'about' && currentPath === '~/about') {
-			output = [...output, { type: 'result', content: directoryContent['~/about'] }];
-		} else if (cmd === 'projects' && currentPath === '~/projects') {
-			output = [...output, { type: 'result', content: directoryContent['~/projects'] }];
+		} else if (cmd === 'open') {
+			if (args[0]) {
+				handleOpen(args[0]);
+			} else {
+				output = [...output, { type: 'result', content: 'open: missing URL argument' }];
+			}
 		} else if (commands[trimmedCommand]) {
 			output = [...output, { type: 'result', content: commands[trimmedCommand] }];
 		} else {
@@ -175,15 +172,18 @@
 		if (targetPath === '~' || targetPath === '~/') {
 			currentPath = '~/';
 			path = currentPath;
+			updateUrl('/');
 		} else if (targetPath === '..') {
 			if (currentPath !== '~/') {
 				currentPath = '~/';
 				path = currentPath;
+				updateUrl('/');
 			}
 		} else if (targetPath.startsWith('~/')) {
 			if (directories[targetPath]) {
 				currentPath = targetPath;
 				path = currentPath;
+				updateUrl('/' + targetPath.replace('~/', ''));
 			} else {
 				output = [
 					...output,
@@ -195,6 +195,7 @@
 			if (directories[fullPath]) {
 				currentPath = fullPath;
 				path = currentPath;
+				updateUrl('/' + fullPath.replace('~/', ''));
 			} else {
 				output = [
 					...output,
@@ -219,6 +220,47 @@
 			output = [...output, { type: 'result', content: 'Nothing to run in this directory.' }];
 		}
 	}
+	function handleOpen(url: string) {
+		if (!url.startsWith('http://') && !url.startsWith('https://')) {
+			url = 'https://' + url;
+		}
+		window.open(url, '_blank');
+	}
+
+	function updateUrl(newPath: string) {
+		if (typeof window !== 'undefined') {
+			const url = newPath === '/' ? '/' : newPath;
+			window.history.pushState({}, '', url);
+		}
+	}
+
+	function setDirectoryFromUrl() {
+		// Only set directory from URL if no initialPath is provided
+		if (initialPath) return;
+
+		if (typeof window !== 'undefined') {
+			const urlPath = window.location.pathname;
+			if (urlPath === '/') {
+				currentPath = '~/';
+				path = currentPath;
+			} else if (urlPath === '/about') {
+				if (directories['~/about']) {
+					currentPath = '~/about';
+					path = currentPath;
+				}
+			} else if (urlPath === '/projects') {
+				if (directories['~/projects']) {
+					currentPath = '~/projects';
+					path = currentPath;
+				}
+			}
+		}
+	}
+
+	function handlePopState() {
+		setDirectoryFromUrl();
+	}
+
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) {
@@ -239,9 +281,19 @@
 	}
 
 	onMount(() => {
+		// Set initial directory from prop or URL
+		if (initialPath) {
+			currentPath = initialPath;
+			path = initialPath;
+		} else {
+			setDirectoryFromUrl();
+		}
+
 		window.addEventListener('keydown', handleKeydown);
+		window.addEventListener('popstate', handlePopState);
 		return () => {
 			window.removeEventListener('keydown', handleKeydown);
+			window.removeEventListener('popstate', handlePopState);
 		};
 	});
 </script>
@@ -287,8 +339,23 @@
 		font-weight: 500;
 		height: 100vh;
 		overflow-y: hidden;
+		overflow-x: hidden;
 		padding: 20px;
 		box-sizing: border-box;
+	}
+
+	@media (max-width: 768px) {
+		.terminal {
+			font-size: 12px;
+			padding: 10px;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.terminal {
+			font-size: 10px;
+			padding: 5px;
+		}
 	}
 
 	.prompt,
@@ -308,7 +375,8 @@
 	.output-line {
 		color: var(--ctp-mocha-text);
 		margin-bottom: 4px;
-		white-space: pre-wrap;
+		white-space: pre;
+		overflow-x: hidden;
 	}
 
 	.user {
