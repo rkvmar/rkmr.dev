@@ -1,7 +1,7 @@
 <script lang="ts">
 	import ShellPrompt from '$lib/components/ShellPrompt.svelte';
 	import { onMount } from 'svelte';
-	let shellPrompt;
+	let shellPrompt: any;
 
 	async function runCommand(command: string) {
 		await shellPrompt.typeAndExecuteCommand(command);
