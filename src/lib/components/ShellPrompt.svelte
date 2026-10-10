@@ -17,6 +17,7 @@
 			let previousPath: string | null = null;
 			let history: string[] = [];
 			let historyIndex = -1;
+			let sessionStart = Date.now();
 
 	export let typingDelay = 50;
 	export let commandPause = 100;
@@ -29,23 +30,24 @@
 			['~/projects', []]
 		]);
 
-const commands: Record<string, string> = {
-		help: 'Available commands: help, clear, cd, ls, run, open, history',
-		clear: '',
-		ls: '',
-		cd: '',
-		run: '',
-		open: '',
-		fimsh: 'he? he romtater??',
-		history: ''
-	};
+	const commands: Record<string, string> = {
+			help: 'Available commands: help, clear, cd, ls, run, open, history, hyfetch',
+			clear: '',
+			ls: '',
+			cd: '',
+			run: '',
+			open: '',
+			fimsh: 'he? he romtater??',
+			history: '',
+			hyfetch: ''
+		};
 
 	const runOutputs: Record<string, string> = {
 			'~/': '         ░██                                           ░██                       \n         ░██                                           ░██                       \n░██░████ ░██    ░██░█████████████  ░██░████      ░████████  ░███████  ░██    ░██ \n░███     ░██   ░██ ░██   ░██   ░██ ░███         ░██    ░██ ░██    ░██ ░██    ░██ \n░██      ░███████  ░██   ░██   ░██ ░██          ░██    ░██ ░█████████  ░██  ░██  \n░██      ░██   ░██ ░██   ░██   ░██ ░██          ░██   ░███ ░██          ░██░██   \n░██      ░██    ░██░██   ░██   ░██ ░██      ░██  ░█████░██  ░███████     ░███    \n\n I make stupid stuff on the interwebs\n[link:cmd:cd ~/about && clear && run]About[/link] | [link:cmd:cd ~/projects && clear && run]Projects[/link] | [link:cmd:open https://github.com/rkvmar]Github[/link]',
 			'~/about':
 				'           ░██                                 ░██    \n           ░██                                 ░██    \n ░██████   ░████████   ░███████  ░██    ░██ ░████████ \n      ░██  ░██    ░██ ░██    ░██ ░██    ░██    ░██    \n ░███████  ░██    ░██ ░██    ░██ ░██    ░██    ░██    \n░██   ░██  ░███   ░██ ░██    ░██ ░██   ░███    ░██    \n ░█████░██ ░██░█████   ░███████   ░█████░██     ░████\n\nHai!\nI make things on the interwebs.\nyou can find some of my projects in [link:cmd:cd /projects && clear && run]Projects[/link]\n[link:cmd:cd && clear && run]Home[/link]',
 			'~/projects':
-				'                                 ░██                          ░██               \n                                                              ░██               \n░████████  ░██░████  ░███████    ░██  ░███████   ░███████  ░████████  ░███████  \n░██    ░██ ░███     ░██    ░██   ░██ ░██    ░██ ░██    ░██    ░██    ░██        \n░██    ░██ ░██      ░██    ░██   ░██ ░█████████ ░██           ░██     ░███████  \n░███   ░██ ░██      ░██    ░██   ░██ ░██        ░██    ░██    ░██           ░██ \n░██░█████  ░██       ░███████    ░██  ░███████   ░███████      ░████  ░███████  \n░██                              ░██                                            \n░██                            ░███\n\n[link:cmd:open https://headways.rkmr.dev]Headways[/link] - Realtime transit system explorer\n[link:cmd:open kanji.rkmr.dev]Kanji[/link] - Kanji training website based on "Kanji Look + Learn" workbook\n[link:cmd:open https://github.com/rkvmar/CelesteSplitsGenerator]CSG[/link] - Speedrun splits generator for Celeste\nBayAreaGame - Unofficial App to play Jet Lag: The Game (Link coming soon)\n\n[link:cmd:cd && clear && run]Home[/link]'
+				'                                 ░██                          ░██               \n                                                              ░██               \n░████████  ░██░████  ░███████    ░██  ░███████   ░███████  ░████████  ░███████  \n░██    ░██ ░███     ░██    ░██   ░██ ░██    ░██ ░██    ░██    ░██    ░██        \n░██    ░██ ░██      ░██    ░██   ░██ ░█████████ ░██           ░██     ░███████  \n░███   ░██ ░██      ░██    ░██   ░██ ░██        ░██    ░██    ░██           ░██ \n░██░█████  ░██       ░███████    ░██  ░███████   ░███████      ░████  ░███████  \n░██                              ░██                                            \n░██                            ░███\n\n[link:cmd:open https://headways.rkmr.dev]Headways[/link] - Realtime transit system explorer\n[link:cmd:open kanji.rkmr.dev]Kanji[/link] - Kanji training website based on "Kanji Look + Learn" workbook\nFlaguu - Unofficial App to play Jet Lag: The Game (Link coming soon)\n\n[link:cmd:cd && clear && run]Home[/link]'
 		};
 
 	function parseLinks(text: string) {
@@ -168,8 +170,10 @@ function scrollToBottom() {
 				output = [...output, { type: 'result', content: 'open: missing URL argument' }];
 			}
 		} else if (cmd === 'history') {
-						handleHistory();
-					} else if (commands[trimmedCommand]) {
+									handleHistory();
+								} else if (cmd === 'hyfetch') {
+									handleHyfetch();
+								} else if (commands[trimmedCommand]) {
 						output = [...output, { type: 'result', content: commands[trimmedCommand] }];
 		} else {
 			output = [
@@ -317,12 +321,74 @@ function scrollToBottom() {
 			output = [...output, { type: 'result', content: numbered }];
 		}
 
-		function handleOpen(url: string) {
-			if (!url.startsWith('http://') && !url.startsWith('https://')) {
-				url = 'https://' + url;
+		function handleHyfetch() {
+				if (typeof window === 'undefined') return;
+
+				const ua = navigator.userAgent;
+				const browsers = [
+					{ re: /Edg\//, name: 'Edge' },
+					{ re: /Chrome\//, name: 'Chrome' },
+					{ re: /Firefox\//, name: 'Firefox' },
+					{ re: /Safari\//, name: 'Safari' }
+				];
+				const matched = browsers.find((b) => b.re.test(ua));
+				const browser = matched ? matched.name : 'Unknown';
+
+				const os = (() => {
+					if (/Windows/.test(ua)) return 'Windows';
+					if (/Mac/.test(ua)) return 'macOS';
+					if (/Linux/.test(ua)) return 'Linux';
+					if (/Android/.test(ua)) return 'Android';
+					if (/iPhone|iPad/.test(ua)) return 'iOS';
+					return 'Unknown';
+				})();
+
+				const elapsed = Math.floor((Date.now() - sessionStart) / 1000);
+				const mins = Math.floor(elapsed / 60);
+				const secs = elapsed % 60;
+				const uptime = `${mins}m ${secs}s`;
+
+				const res = `${window.innerWidth}x${window.innerHeight}`;
+
+				// Pride flag gradient using shade characters
+				const flag = [
+					'████████████████████',
+					'▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓',
+					'▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒',
+					'░░░░░░░░░░░░░░░░░░░░',
+					'░░░░░░░░░░░░░░░░░░░░',
+					'▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒',
+					'▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓',
+					'████████████████████'
+				].join('\n');
+
+				const lines = [
+					'',
+					flag,
+					'',
+					`${user}@${host}`,
+					`${'-'.repeat(user.length + host.length + 1)}`,
+					`OS:         ${os}`,
+					`Host:       ${host}`,
+					`Browser:    ${browser}`,
+					`Resolution: ${res}`,
+					`Uptime:     ${uptime}`,
+					`Packages:   0 (this is not a real server)`,
+					`Shell:      zsh 5.9 (pretend)`,
+					'',
+					`Welcome to ${host}! 🏳️‍🌈`,
+					''
+				].join('\n');
+
+				output = [...output, { type: 'result', content: lines }];
 			}
-			window.open(url, '_blank');
-		}
+
+			function handleOpen(url: string) {
+				if (!url.startsWith('http://') && !url.startsWith('https://')) {
+					url = 'https://' + url;
+				}
+				window.open(url, '_blank');
+			}
 
 	function pathToUrl(p: string): string {
 			if (p === '~' || p === '~/') return '/';
