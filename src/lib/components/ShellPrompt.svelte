@@ -1,23 +1,23 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-			export let user = 'rkmr';
-			export let host = 'rkmr.dev';
-			export let path = '~/';
-			export let initialPath = '';
-			let prompt = '';
-			let output: Array<{
-				type: 'command' | 'result';
-				content: string;
-				user?: string;
-				host?: string;
-				path?: string;
-			}> = [];
-			let currentPath = '~/';
-			let previousPath: string | null = null;
-			let history: string[] = [];
-			let historyIndex = -1;
-			let sessionStart = Date.now();
+	export let user = 'rkmr';
+	export let host = 'rkmr.dev';
+	export let path = '~/';
+	export let initialPath = '';
+	let prompt = '';
+	let output: Array<{
+		type: 'command' | 'result';
+		content: string;
+		user?: string;
+		host?: string;
+		path?: string;
+	}> = [];
+	let currentPath = '~/';
+	let previousPath: string | null = null;
+	let history: string[] = [];
+	let historyIndex = -1;
+	let sessionStart = Date.now();
 
 	export let typingDelay = 50;
 	export let commandPause = 100;
@@ -25,30 +25,29 @@
 	let terminalElement: HTMLElement;
 
 	const directories = new Map<string, string[]>([
-			['~', ['about', 'projects']],
-			['~/about', []],
-			['~/projects', []]
-		]);
+		['~', ['about', 'projects']],
+		['~/about', []],
+		['~/projects', []]
+	]);
 
 	const commands: Record<string, string> = {
-			help: 'Available commands: help, clear, cd, ls, run, open, history, hyfetch',
-			clear: '',
-			ls: '',
-			cd: '',
-			run: '',
-			open: '',
-			fimsh: 'he? he romtater??',
-			history: '',
-			hyfetch: ''
-		};
+		help: 'Available commands: help, clear, cd, ls, run, open, history',
+		clear: '',
+		ls: '',
+		cd: '',
+		run: '',
+		open: '',
+		fimsh: 'he? he romtater??',
+		history: ''
+	};
 
 	const runOutputs: Record<string, string> = {
-			'~/': '         ░██                                           ░██                       \n         ░██                                           ░██                       \n░██░████ ░██    ░██░█████████████  ░██░████      ░████████  ░███████  ░██    ░██ \n░███     ░██   ░██ ░██   ░██   ░██ ░███         ░██    ░██ ░██    ░██ ░██    ░██ \n░██      ░███████  ░██   ░██   ░██ ░██          ░██    ░██ ░█████████  ░██  ░██  \n░██      ░██   ░██ ░██   ░██   ░██ ░██          ░██   ░███ ░██          ░██░██   \n░██      ░██    ░██░██   ░██   ░██ ░██      ░██  ░█████░██  ░███████     ░███    \n\n I make stupid stuff on the interwebs\n[link:cmd:cd ~/about && clear && run]About[/link] | [link:cmd:cd ~/projects && clear && run]Projects[/link] | [link:cmd:open https://github.com/rkvmar]Github[/link]',
-			'~/about':
-				'           ░██                                 ░██    \n           ░██                                 ░██    \n ░██████   ░████████   ░███████  ░██    ░██ ░████████ \n      ░██  ░██    ░██ ░██    ░██ ░██    ░██    ░██    \n ░███████  ░██    ░██ ░██    ░██ ░██    ░██    ░██    \n░██   ░██  ░███   ░██ ░██    ░██ ░██   ░███    ░██    \n ░█████░██ ░██░█████   ░███████   ░█████░██     ░████\n\nHai!\nI make things on the interwebs.\nyou can find some of my projects in [link:cmd:cd /projects && clear && run]Projects[/link]\n[link:cmd:cd && clear && run]Home[/link]',
-			'~/projects':
-				'                                 ░██                          ░██               \n                                                              ░██               \n░████████  ░██░████  ░███████    ░██  ░███████   ░███████  ░████████  ░███████  \n░██    ░██ ░███     ░██    ░██   ░██ ░██    ░██ ░██    ░██    ░██    ░██        \n░██    ░██ ░██      ░██    ░██   ░██ ░█████████ ░██           ░██     ░███████  \n░███   ░██ ░██      ░██    ░██   ░██ ░██        ░██    ░██    ░██           ░██ \n░██░█████  ░██       ░███████    ░██  ░███████   ░███████      ░████  ░███████  \n░██                              ░██                                            \n░██                            ░███\n\n[link:cmd:open https://headways.rkmr.dev]Headways[/link] - Realtime transit system explorer\n[link:cmd:open kanji.rkmr.dev]Kanji[/link] - Kanji training website based on "Kanji Look + Learn" workbook\nFlaguu - Unofficial App to play Jet Lag: The Game (Link coming soon)\n\n[link:cmd:cd && clear && run]Home[/link]'
-		};
+		'~/': '         ░██                                           ░██                       \n         ░██                                           ░██                       \n░██░████ ░██    ░██░█████████████  ░██░████      ░████████  ░███████  ░██    ░██ \n░███     ░██   ░██ ░██   ░██   ░██ ░███         ░██    ░██ ░██    ░██ ░██    ░██ \n░██      ░███████  ░██   ░██   ░██ ░██          ░██    ░██ ░█████████  ░██  ░██  \n░██      ░██   ░██ ░██   ░██   ░██ ░██          ░██   ░███ ░██          ░██░██   \n░██      ░██    ░██░██   ░██   ░██ ░██      ░██  ░█████░██  ░███████     ░███    \n\n I make stupid stuff on the interwebs\n[link:cmd:cd ~/about && clear && run]About[/link] | [link:cmd:cd ~/projects && clear && run]Projects[/link] | [link:cmd:open https://github.com/rkvmar]Github[/link]',
+		'~/about':
+			'           ░██                                 ░██    \n           ░██                                 ░██    \n ░██████   ░████████   ░███████  ░██    ░██ ░████████ \n      ░██  ░██    ░██ ░██    ░██ ░██    ░██    ░██    \n ░███████  ░██    ░██ ░██    ░██ ░██    ░██    ░██    \n░██   ░██  ░███   ░██ ░██    ░██ ░██   ░███    ░██    \n ░█████░██ ░██░█████   ░███████   ░█████░██     ░████\n\nHai!\nI make things on the interwebs.\nyou can find some of my projects in [link:cmd:cd /projects && clear && run]Projects[/link]\n[link:cmd:cd && clear && run]Home[/link]',
+		'~/projects':
+			'                                 ░██                          ░██               \n                                                              ░██               \n░████████  ░██░████  ░███████    ░██  ░███████   ░███████  ░████████  ░███████  \n░██    ░██ ░███     ░██    ░██   ░██ ░██    ░██ ░██    ░██    ░██    ░██        \n░██    ░██ ░██      ░██    ░██   ░██ ░█████████ ░██           ░██     ░███████  \n░███   ░██ ░██      ░██    ░██   ░██ ░██        ░██    ░██    ░██           ░██ \n░██░█████  ░██       ░███████    ░██  ░███████   ░███████      ░████  ░███████  \n░██                              ░██                                            \n░██                            ░███\n\n[link:cmd:open https://headways.transbay.dev]Headways[/link] - Realtime transit system explorer\n[link:cmd:open kanji.rkmr.dev]Kanji[/link] - Kanji training website based on "Kanji Look + Learn" workbook\nFlaguu - Unofficial App to play Jet Lag: The Game (Link coming soon)\n\n[link:cmd:cd && clear && run]Home[/link]'
+	};
 
 	function parseLinks(text: string) {
 		const linkRegex = /\[link:(url|cmd):([^\]]+)\]([^\[]+)\[\/link\]/g;
@@ -85,20 +84,20 @@
 	}
 
 	async function handleLinkClick(linkType: string | undefined, target: string | undefined) {
-			if (linkType === 'url' && target) {
-				window.open(target, '_blank');
-			} else if (linkType === 'cmd' && target) {
-				if (target.includes('&&')) {
-					const commands = target.split('&&').map((cmd) => cmd.trim());
-					for (const cmd of commands) {
-						await typeAndExecuteCommand(cmd);
-						await new Promise((resolve) => setTimeout(resolve, commandPause));
-					}
-				} else {
-					await typeAndExecuteCommand(target);
+		if (linkType === 'url' && target) {
+			window.open(target, '_blank');
+		} else if (linkType === 'cmd' && target) {
+			if (target.includes('&&')) {
+				const commands = target.split('&&').map((cmd) => cmd.trim());
+				for (const cmd of commands) {
+					await typeAndExecuteCommand(cmd);
+					await new Promise((resolve) => setTimeout(resolve, commandPause));
 				}
+			} else {
+				await typeAndExecuteCommand(target);
 			}
 		}
+	}
 
 	export async function typeAndExecuteCommand(command: string) {
 		clearPrompt();
@@ -132,7 +131,7 @@
 		scrollToBottom();
 	}
 
-function scrollToBottom() {
+	function scrollToBottom() {
 		if (terminalElement) {
 			setTimeout(() => {
 				terminalElement.scrollTop = terminalElement.scrollHeight;
@@ -170,11 +169,9 @@ function scrollToBottom() {
 				output = [...output, { type: 'result', content: 'open: missing URL argument' }];
 			}
 		} else if (cmd === 'history') {
-									handleHistory();
-								} else if (cmd === 'hyfetch') {
-									handleHyfetch();
-								} else if (commands[trimmedCommand]) {
-						output = [...output, { type: 'result', content: commands[trimmedCommand] }];
+			handleHistory();
+		} else if (commands[trimmedCommand]) {
+			output = [...output, { type: 'result', content: commands[trimmedCommand] }];
 		} else {
 			output = [
 				...output,
@@ -211,9 +208,8 @@ function scrollToBottom() {
 			resolved = '~' + input;
 		} else {
 			// Relative to current path
-			resolved = currentPath === '~/' || currentPath === '~'
-				? '~/' + input
-				: currentPath + '/' + input;
+			resolved =
+				currentPath === '~/' || currentPath === '~' ? '~/' + input : currentPath + '/' + input;
 		}
 
 		// Normalize: split by /, process each segment
@@ -238,12 +234,12 @@ function scrollToBottom() {
 		}
 
 		// Reconstruct: if it started with ~, preserve that
-			if (resolved.startsWith('~')) {
-				if (stack.length === 0 || (stack.length === 1 && stack[0] === '~')) {
-					return '~';
-				}
-				return '~/' + stack.slice(1).join('/');
+		if (resolved.startsWith('~')) {
+			if (stack.length === 0 || (stack.length === 1 && stack[0] === '~')) {
+				return '~';
 			}
+			return '~/' + stack.slice(1).join('/');
+		}
 
 		return stack.join('/');
 	}
@@ -273,7 +269,10 @@ function scrollToBottom() {
 				updateUrl(pathToUrl(currentPath));
 				return;
 			} else {
-				output = [...output, { type: 'result', content: `cd: no such file or directory: ${rawTarget}` }];
+				output = [
+					...output,
+					{ type: 'result', content: `cd: no such file or directory: ${rawTarget}` }
+				];
 				return;
 			}
 		}
@@ -281,7 +280,10 @@ function scrollToBottom() {
 		const resolved = resolvePath(target);
 
 		if (resolved === null) {
-			output = [...output, { type: 'result', content: `cd: no such file or directory: ${rawTarget}` }];
+			output = [
+				...output,
+				{ type: 'result', content: `cd: no such file or directory: ${rawTarget}` }
+			];
 			return;
 		}
 
@@ -291,227 +293,230 @@ function scrollToBottom() {
 			path = currentPath;
 			updateUrl(pathToUrl(currentPath));
 		} else {
-			output = [...output, { type: 'result', content: `cd: no such file or directory: ${rawTarget}` }];
+			output = [
+				...output,
+				{ type: 'result', content: `cd: no such file or directory: ${rawTarget}` }
+			];
 		}
 	}
 
 	function handleLs() {
-			const items = directories.get(currentPath) || [];
-			if (items.length > 0) {
-				output = [...output, { type: 'result', content: items.join('  ') }];
-			}
+		const items = directories.get(currentPath) || [];
+		if (items.length > 0) {
+			output = [...output, { type: 'result', content: items.join('  ') }];
 		}
+	}
 
 	function handleRun() {
-			// Normalize path for lookup: map ~ or ~/ to ~/ for runOutputs keys
-			const lookupPath = currentPath === '~' ? '~/' : currentPath;
-			const runOutput = runOutputs[lookupPath];
-			if (runOutput) {
-				output = [...output, { type: 'result', content: runOutput }];
-			} else {
-				output = [...output, { type: 'result', content: 'Nothing to run in this directory.' }];
-			}
+		// Normalize path for lookup: map ~ or ~/ to ~/ for runOutputs keys
+		const lookupPath = currentPath === '~' ? '~/' : currentPath;
+		const runOutput = runOutputs[lookupPath];
+		if (runOutput) {
+			output = [...output, { type: 'result', content: runOutput }];
+		} else {
+			output = [...output, { type: 'result', content: 'Nothing to run in this directory.' }];
 		}
+	}
 	function handleHistory() {
-			if (history.length === 0) {
-				output = [...output, { type: 'result', content: 'No commands in history.' }];
-				return;
-			}
-			const numbered = history.map((cmd, i) => `${i + 1}  ${cmd}`).join('\n');
-			output = [...output, { type: 'result', content: numbered }];
+		if (history.length === 0) {
+			output = [...output, { type: 'result', content: 'No commands in history.' }];
+			return;
 		}
+		const numbered = history.map((cmd, i) => `${i + 1}  ${cmd}`).join('\n');
+		output = [...output, { type: 'result', content: numbered }];
+	}
 
-		function handleHyfetch() {
-				if (typeof window === 'undefined') return;
+	function handleHyfetch() {
+		if (typeof window === 'undefined') return;
 
-				const ua = navigator.userAgent;
-				const browsers = [
-					{ re: /Edg\//, name: 'Edge' },
-					{ re: /Chrome\//, name: 'Chrome' },
-					{ re: /Firefox\//, name: 'Firefox' },
-					{ re: /Safari\//, name: 'Safari' }
-				];
-				const matched = browsers.find((b) => b.re.test(ua));
-				const browser = matched ? matched.name : 'Unknown';
+		const ua = navigator.userAgent;
+		const browsers = [
+			{ re: /Edg\//, name: 'Edge' },
+			{ re: /Chrome\//, name: 'Chrome' },
+			{ re: /Firefox\//, name: 'Firefox' },
+			{ re: /Safari\//, name: 'Safari' }
+		];
+		const matched = browsers.find((b) => b.re.test(ua));
+		const browser = matched ? matched.name : 'Unknown';
 
-				const os = (() => {
-					if (/Windows/.test(ua)) return 'Windows';
-					if (/Mac/.test(ua)) return 'macOS';
-					if (/Linux/.test(ua)) return 'Linux';
-					if (/Android/.test(ua)) return 'Android';
-					if (/iPhone|iPad/.test(ua)) return 'iOS';
-					return 'Unknown';
-				})();
+		const os = (() => {
+			if (/Windows/.test(ua)) return 'Windows';
+			if (/Mac/.test(ua)) return 'macOS';
+			if (/Linux/.test(ua)) return 'Linux';
+			if (/Android/.test(ua)) return 'Android';
+			if (/iPhone|iPad/.test(ua)) return 'iOS';
+			return 'Unknown';
+		})();
 
-				const elapsed = Math.floor((Date.now() - sessionStart) / 1000);
-				const mins = Math.floor(elapsed / 60);
-				const secs = elapsed % 60;
-				const uptime = `${mins}m ${secs}s`;
+		const elapsed = Math.floor((Date.now() - sessionStart) / 1000);
+		const mins = Math.floor(elapsed / 60);
+		const secs = elapsed % 60;
+		const uptime = `${mins}m ${secs}s`;
 
-				const res = `${window.innerWidth}x${window.innerHeight}`;
+		const res = `${window.innerWidth}x${window.innerHeight}`;
 
-				// Pride flag gradient using shade characters
-				const flag = [
-					'████████████████████',
-					'▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓',
-					'▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒',
-					'░░░░░░░░░░░░░░░░░░░░',
-					'░░░░░░░░░░░░░░░░░░░░',
-					'▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒',
-					'▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓',
-					'████████████████████'
-				].join('\n');
+		// Pride flag gradient using shade characters
+		const flag = [
+			'████████████████████',
+			'▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓',
+			'▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒',
+			'░░░░░░░░░░░░░░░░░░░░',
+			'░░░░░░░░░░░░░░░░░░░░',
+			'▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒',
+			'▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓',
+			'████████████████████'
+		].join('\n');
 
-				const lines = [
-					'',
-					flag,
-					'',
-					`${user}@${host}`,
-					`${'-'.repeat(user.length + host.length + 1)}`,
-					`OS:         ${os}`,
-					`Host:       ${host}`,
-					`Browser:    ${browser}`,
-					`Resolution: ${res}`,
-					`Uptime:     ${uptime}`,
-					`Packages:   0 (this is not a real server)`,
-					`Shell:      zsh 5.9 (pretend)`,
-					'',
-					`Welcome to ${host}! 🏳️‍🌈`,
-					''
-				].join('\n');
+		const lines = [
+			'',
+			flag,
+			'',
+			`${user}@${host}`,
+			`${'-'.repeat(user.length + host.length + 1)}`,
+			`OS:         ${os}`,
+			`Host:       ${host}`,
+			`Browser:    ${browser}`,
+			`Resolution: ${res}`,
+			`Uptime:     ${uptime}`,
+			`Packages:   0 (this is not a real server)`,
+			`Shell:      zsh 5.9 (pretend)`,
+			'',
+			`Welcome to ${host}! 🏳️‍🌈`,
+			''
+		].join('\n');
 
-				output = [...output, { type: 'result', content: lines }];
-			}
+		output = [...output, { type: 'result', content: lines }];
+	}
 
-			function handleOpen(url: string) {
-				if (!url.startsWith('http://') && !url.startsWith('https://')) {
-					url = 'https://' + url;
-				}
-				window.open(url, '_blank');
-			}
+	function handleOpen(url: string) {
+		if (!url.startsWith('http://') && !url.startsWith('https://')) {
+			url = 'https://' + url;
+		}
+		window.open(url, '_blank');
+	}
 
 	function pathToUrl(p: string): string {
-			if (p === '~' || p === '~/') return '/';
-			return '/' + p.replace('~/', '');
-		}
+		if (p === '~' || p === '~/') return '/';
+		return '/' + p.replace('~/', '');
+	}
 
-		function updateUrl(newPath: string) {
-			if (typeof window !== 'undefined') {
-				const url = newPath === '/' ? '/' : newPath;
-				window.history.pushState({}, '', url);
-			}
+	function updateUrl(newPath: string) {
+		if (typeof window !== 'undefined') {
+			const url = newPath === '/' ? '/' : newPath;
+			window.history.pushState({}, '', url);
 		}
+	}
 
 	function setDirectoryFromUrl() {
-			// Only set directory from URL if no initialPath is provided
-			if (initialPath) return;
+		// Only set directory from URL if no initialPath is provided
+		if (initialPath) return;
 
-			if (typeof window !== 'undefined') {
-				const urlPath = window.location.pathname;
-				// Normalize: remove trailing slash (except for root)
-				const normalized = urlPath === '/' ? '/' : urlPath.replace(/\/+$/, '');
+		if (typeof window !== 'undefined') {
+			const urlPath = window.location.pathname;
+			// Normalize: remove trailing slash (except for root)
+			const normalized = urlPath === '/' ? '/' : urlPath.replace(/\/+$/, '');
 
-				if (normalized === '/') {
-					currentPath = '~';
+			if (normalized === '/') {
+				currentPath = '~';
+				path = currentPath;
+			} else {
+				const dirPath = '~' + normalized;
+				if (directories.has(dirPath)) {
+					currentPath = dirPath;
 					path = currentPath;
-				} else {
-					const dirPath = '~' + normalized;
-					if (directories.has(dirPath)) {
-						currentPath = dirPath;
-						path = currentPath;
-					}
 				}
 			}
 		}
+	}
 
 	function handleTabCompletion() {
-			if (!prompt.trim()) return;
+		if (!prompt.trim()) return;
 
-			const parts = prompt.trim().split(' ');
-			const cmd = parts[0];
+		const parts = prompt.trim().split(' ');
+		const cmd = parts[0];
 
-			// Only complete paths for cd and ls
-			if ((cmd === 'cd' || cmd === 'ls') && parts.length > 1) {
-				const partial = parts.slice(1).join(' ');
+		// Only complete paths for cd and ls
+		if ((cmd === 'cd' || cmd === 'ls') && parts.length > 1) {
+			const partial = parts.slice(1).join(' ');
 
-				// Get all possible completions from directories
-				const allDirs = Array.from(directories.keys());
-				const currentDirEntries = directories.get(currentPath) || [];
+			// Get all possible completions from directories
+			const allDirs = Array.from(directories.keys());
+			const currentDirEntries = directories.get(currentPath) || [];
 
-				// Build a list of completable names from current directory
-				const candidates = currentDirEntries.filter((name) => name.startsWith(partial));
+			// Build a list of completable names from current directory
+			const candidates = currentDirEntries.filter((name) => name.startsWith(partial));
 
-				if (candidates.length === 1) {
-					parts[parts.length - 1] = candidates[0];
-					prompt = parts.join(' ') + ' ';
-				} else if (candidates.length > 1) {
-					// Find common prefix and show possibilities
-					const commonPrefix = findLongestCommonPrefix(candidates);
-					if (commonPrefix && commonPrefix.length > partial.length) {
-						parts[parts.length - 1] = commonPrefix;
-						prompt = parts.join(' ');
-					} else {
-						output = [...output, { type: 'result', content: candidates.join('  ') }];
-					}
+			if (candidates.length === 1) {
+				parts[parts.length - 1] = candidates[0];
+				prompt = parts.join(' ') + ' ';
+			} else if (candidates.length > 1) {
+				// Find common prefix and show possibilities
+				const commonPrefix = findLongestCommonPrefix(candidates);
+				if (commonPrefix && commonPrefix.length > partial.length) {
+					parts[parts.length - 1] = commonPrefix;
+					prompt = parts.join(' ');
+				} else {
+					output = [...output, { type: 'result', content: candidates.join('  ') }];
 				}
 			}
 		}
+	}
 
-		function findLongestCommonPrefix(strings: string[]): string {
-			if (strings.length === 0) return '';
-			let prefix = strings[0];
-			for (let i = 1; i < strings.length; i++) {
-				while (strings[i].indexOf(prefix) !== 0) {
-					prefix = prefix.slice(0, -1);
-					if (prefix === '') return '';
-				}
+	function findLongestCommonPrefix(strings: string[]): string {
+		if (strings.length === 0) return '';
+		let prefix = strings[0];
+		for (let i = 1; i < strings.length; i++) {
+			while (strings[i].indexOf(prefix) !== 0) {
+				prefix = prefix.slice(0, -1);
+				if (prefix === '') return '';
 			}
-			return prefix;
 		}
+		return prefix;
+	}
 
-		function handlePopState() {
-			setDirectoryFromUrl();
-		}
+	function handlePopState() {
+		setDirectoryFromUrl();
+	}
 
 	function handleKeydown(event: KeyboardEvent) {
-			if (event.metaKey || event.ctrlKey) {
-				return;
-			}
-
-			if (event.key === 'Backspace') {
-				prompt = prompt.slice(0, -1);
-			} else if (event.key === 'Enter') {
-				if (prompt.trim()) {
-					history = [...history, prompt.trim()];
-					historyIndex = history.length;
-				}
-				executeCommand(prompt);
-				prompt = '';
-				scrollToBottom();
-				event.preventDefault();
-			} else if (event.key === 'ArrowUp') {
-				event.preventDefault();
-				if (historyIndex > 0) {
-					historyIndex--;
-					prompt = history[historyIndex];
-				}
-			} else if (event.key === 'ArrowDown') {
-				event.preventDefault();
-				if (historyIndex < history.length - 1) {
-					historyIndex++;
-					prompt = history[historyIndex];
-				} else {
-					historyIndex = history.length;
-					prompt = '';
-				}
-			} else if (event.key === 'Tab') {
-				event.preventDefault();
-				handleTabCompletion();
-			} else if (event.key.length === 1) {
-				prompt += event.key;
-				event.preventDefault();
-			}
+		if (event.metaKey || event.ctrlKey) {
+			return;
 		}
+
+		if (event.key === 'Backspace') {
+			prompt = prompt.slice(0, -1);
+		} else if (event.key === 'Enter') {
+			if (prompt.trim()) {
+				history = [...history, prompt.trim()];
+				historyIndex = history.length;
+			}
+			executeCommand(prompt);
+			prompt = '';
+			scrollToBottom();
+			event.preventDefault();
+		} else if (event.key === 'ArrowUp') {
+			event.preventDefault();
+			if (historyIndex > 0) {
+				historyIndex--;
+				prompt = history[historyIndex];
+			}
+		} else if (event.key === 'ArrowDown') {
+			event.preventDefault();
+			if (historyIndex < history.length - 1) {
+				historyIndex++;
+				prompt = history[historyIndex];
+			} else {
+				historyIndex = history.length;
+				prompt = '';
+			}
+		} else if (event.key === 'Tab') {
+			event.preventDefault();
+			handleTabCompletion();
+		} else if (event.key.length === 1) {
+			prompt += event.key;
+			event.preventDefault();
+		}
+	}
 
 	onMount(() => {
 		// Set initial directory from prop or URL
